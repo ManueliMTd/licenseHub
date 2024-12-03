@@ -150,17 +150,27 @@ const LicenseManager = () => {
             <TableCell>Status</TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
           {licenses.map((license) => {
             const { message, color } = getLicenseStatus(
               license.expiration_date
             );
+
+            console.log(
+              license,
+              license.last_checked_date,
+              "eeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            );
+
             return (
               <TableRow key={license.license_key}>
                 <TableCell>{license.license_key}</TableCell>
                 <TableCell>{license.expiration_date}</TableCell>
                 <TableCell>
-                  {license.last_checked_date || "Not yet checked"}
+                  {license.last_checked_date
+                    ? license.last_checked_date
+                    : "Not yet checked"}
                 </TableCell>
                 <TableCell>
                   <Button
