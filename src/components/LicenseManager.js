@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import axios from "axios";
+import { differenceInDays, parseISO } from "date-fns";
 
 const LicenseManager = () => {
   const [licenses, setLicenses] = useState([]);
@@ -103,6 +104,24 @@ const LicenseManager = () => {
     }
   };
 
+  // Get status message and color
+  const getLicenseStatus = (expirationDate) => {
+    const today = new Date();
+    const expiration = parseISO(expirationDate);
+    const daysRemaining = differenceInDays(expiration, today);
+
+    if (daysRemaining > 30) {
+      return { message: `${daysRemaining} days remaining`, color: "green" };
+    } else if (daysRemaining > 0) {
+      return { message: `${daysRemaining} days remaining`, color: "orange" };
+    } else {
+      return {
+        message: `Expired ${Math.abs(daysRemaining)} days ago`,
+        color: "red",
+      };
+    }
+  };
+
   useEffect(() => {
     fetchLicenses();
   }, []);
@@ -127,33 +146,40 @@ const LicenseManager = () => {
             <TableCell>Key</TableCell>
             <TableCell>Expiration Date</TableCell>
             <TableCell>Actions</TableCell>
+            <TableCell>Status</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {licenses.map((license) => (
-            <TableRow key={license.license_key}>
-              <TableCell>{license.license_key}</TableCell>
-              <TableCell>{license.expiration_date}</TableCell>
-              <TableCell>
-                <Button
-                  variant="text"
-                  color="primary"
-                  onClick={() => handleOpenModal("edit", license)}
-                  startIcon={<FaEdit />}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="text"
-                  color="secondary"
-                  onClick={() => handleDelete(license.license_key)}
-                  startIcon={<FaTrash />}
-                >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {licenses.map((license) => {
+            const { message, color } = getLicenseStatus(
+              license.expiration_date
+            );
+            return (
+              <TableRow key={license.license_key}>
+                <TableCell>{license.license_key}</TableCell>
+                <TableCell>{license.expiration_date}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="text"
+                    color="primary"
+                    onClick={() => handleOpenModal("edit", license)}
+                    startIcon={<FaEdit />}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="text"
+                    color="secondary"
+                    onClick={() => handleDelete(license.license_key)}
+                    startIcon={<FaTrash />}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+                <TableCell style={{ color }}>{message}</TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
 
