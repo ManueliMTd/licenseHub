@@ -10,7 +10,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { FaEdit, FaTrash } from "react-icons/fa"; // Importar íconos de React Icons
+import { FaEdit, FaTrash } from "react-icons/fa";
 import axios from "axios";
 
 const LicenseManager = () => {
@@ -21,45 +21,70 @@ const LicenseManager = () => {
   });
   const [editingLicense, setEditingLicense] = useState(null);
 
+  // Fetch licenses from the backend and transform the object into an array
   const fetchLicenses = async () => {
-    const response = await axios.get(
-      "https://storingfunctions.azurewebsites.net/api/licenses"
-    );
-    setLicenses(response.data);
-  };
+    try {
+      const response = await axios.get(
+        "https://storingfunctions.azurewebsites.net/api/licenses"
+      );
 
-  const handleCreateOrUpdate = async () => {
-    if (editingLicense) {
-      // Actualizar licencia
-      await axios.put(
-        "https://storingfunctions.azurewebsites.net/api/licenses",
-        newLicense
+      // Convert object to array
+      const licensesArray = Object.entries(response.data).map(
+        ([key, value]) => ({
+          license_key: key,
+          expiration_date: value.expiration_date,
+        })
       );
-      setEditingLicense(null);
-    } else {
-      // Crear nueva licencia
-      await axios.post(
-        "https://storingfunctions.azurewebsites.net/api/licenses",
-        newLicense
-      );
+
+      setLicenses(licensesArray);
+    } catch (error) {
+      console.error("Error fetching licenses:", error);
     }
-    setNewLicense({ license_key: "", expiration_date: "" });
-    fetchLicenses();
   };
 
+  // Create or update a license
+  const handleCreateOrUpdate = async () => {
+    try {
+      if (editingLicense) {
+        // Update license
+        await axios.put(
+          "https://storingfunctions.azurewebsites.net/api/licenses",
+          newLicense
+        );
+        setEditingLicense(null);
+      } else {
+        // Create new license
+        await axios.post(
+          "https://storingfunctions.azurewebsites.net/api/licenses",
+          newLicense
+        );
+      }
+      setNewLicense({ license_key: "", expiration_date: "" });
+      fetchLicenses();
+    } catch (error) {
+      console.error("Error creating/updating license:", error);
+    }
+  };
+
+  // Edit a license
   const handleEdit = (license) => {
     setEditingLicense(license);
     setNewLicense(license);
   };
 
+  // Delete a license
   const handleDelete = async (license_key) => {
-    await axios.delete(
-      "https://storingfunctions.azurewebsites.net/api/licenses",
-      {
-        data: { license_key },
-      }
-    );
-    fetchLicenses();
+    try {
+      await axios.delete(
+        "https://storingfunctions.azurewebsites.net/api/licenses",
+        {
+          data: { license_key },
+        }
+      );
+      fetchLicenses();
+    } catch (error) {
+      console.error("Error deleting license:", error);
+    }
   };
 
   useEffect(() => {
@@ -79,7 +104,7 @@ const LicenseManager = () => {
             setNewLicense({ ...newLicense, license_key: e.target.value })
           }
           margin="normal"
-          disabled={!!editingLicense} // No se puede editar la clave al actualizar
+          disabled={!!editingLicense} // Disable key field when editing
         />
         <TextField
           label="Fecha de Expiración"
