@@ -9,7 +9,7 @@ const Login = ({ onLogin }) => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("https://storingfunctions.azurewebsites.net/api/login", {
+      await axios.post("https://storingfunctions.azurewebsites.net/api/login", {
         username,
         password,
       });
