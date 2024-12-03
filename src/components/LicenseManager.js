@@ -168,9 +168,7 @@ const LicenseManager = () => {
                 <TableCell>{license.license_key}</TableCell>
                 <TableCell>{license.expiration_date}</TableCell>
                 <TableCell>
-                  {license.last_checked_date
-                    ? license.last_checked_date
-                    : "Not yet checked"}
+                  {license.last_checked_date || "Not yet checked"}
                 </TableCell>
                 <TableCell>
                   <Button
