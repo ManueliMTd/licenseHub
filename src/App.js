@@ -1,25 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import Login from "./components/Login";
+import LicenseManager from "./components/LicenseManager";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("token"));
+    if (token && Date.now() - token.timestamp < 3600000) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  return isLoggedIn ? <LicenseManager /> : <Login onLogin={setIsLoggedIn} />;
+};
 
 export default App;
