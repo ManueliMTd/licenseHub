@@ -3,18 +3,21 @@ import {
   Box,
   Typography,
   Button,
-  TextField,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Modal,
+  TextField,
 } from "@mui/material";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import axios from "axios";
 
 const LicenseManager = () => {
   const [licenses, setLicenses] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [modalType, setModalType] = useState(""); // 'create' or 'edit'
   const [newLicense, setNewLicense] = useState({
     license_key: "",
     expiration_date: "",
@@ -42,16 +45,35 @@ const LicenseManager = () => {
     }
   };
 
-  // Create or update a license
-  const handleCreateOrUpdate = async () => {
+  // Handle opening the modal
+  const handleOpenModal = (type, license = null) => {
+    setModalType(type);
+    if (type === "edit" && license) {
+      setNewLicense(license);
+      setEditingLicense(license);
+    } else {
+      setNewLicense({ license_key: "", expiration_date: "" });
+      setEditingLicense(null);
+    }
+    setOpenModal(true);
+  };
+
+  // Handle closing the modal
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setNewLicense({ license_key: "", expiration_date: "" });
+    setEditingLicense(null);
+  };
+
+  // Handle create or update
+  const handleSave = async () => {
     try {
-      if (editingLicense) {
+      if (modalType === "edit") {
         // Update license
         await axios.put(
           "https://storingfunctions.azurewebsites.net/api/licenses",
           newLicense
         );
-        setEditingLicense(null);
       } else {
         // Create new license
         await axios.post(
@@ -59,17 +81,11 @@ const LicenseManager = () => {
           newLicense
         );
       }
-      setNewLicense({ license_key: "", expiration_date: "" });
       fetchLicenses();
+      handleCloseModal();
     } catch (error) {
-      console.error("Error creating/updating license:", error);
+      console.error("Error saving license:", error);
     }
-  };
-
-  // Edit a license
-  const handleEdit = (license) => {
-    setEditingLicense(license);
-    setNewLicense(license);
   };
 
   // Delete a license
@@ -94,53 +110,23 @@ const LicenseManager = () => {
   return (
     <Box p={4}>
       <Typography variant="h4" gutterBottom>
-        Licencias
+        License Management
       </Typography>
-      <Box mb={2}>
-        <TextField
-          label="Clave de Licencia"
-          value={newLicense.license_key}
-          onChange={(e) =>
-            setNewLicense({ ...newLicense, license_key: e.target.value })
-          }
-          margin="normal"
-          disabled={!!editingLicense} // Disable key field when editing
-        />
-        <TextField
-          label="Fecha de Expiración"
-          type="date"
-          value={newLicense.expiration_date}
-          onChange={(e) =>
-            setNewLicense({ ...newLicense, expiration_date: e.target.value })
-          }
-          margin="normal"
-        />
-        <Button
-          variant="contained"
-          onClick={handleCreateOrUpdate}
-          style={{ marginTop: "10px" }}
-        >
-          {editingLicense ? "Actualizar Licencia" : "Crear Licencia"}
-        </Button>
-        {editingLicense && (
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setEditingLicense(null);
-              setNewLicense({ license_key: "", expiration_date: "" });
-            }}
-            style={{ marginLeft: "10px", marginTop: "10px" }}
-          >
-            Cancelar
-          </Button>
-        )}
-      </Box>
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<FaPlus />}
+        onClick={() => handleOpenModal("create")}
+        style={{ marginBottom: "20px" }}
+      >
+        Generate New License
+      </Button>
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Clave</TableCell>
-            <TableCell>Fecha de Expiración</TableCell>
-            <TableCell>Acciones</TableCell>
+            <TableCell>Key</TableCell>
+            <TableCell>Expiration Date</TableCell>
+            <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -152,10 +138,10 @@ const LicenseManager = () => {
                 <Button
                   variant="text"
                   color="primary"
-                  onClick={() => handleEdit(license)}
+                  onClick={() => handleOpenModal("edit", license)}
                   startIcon={<FaEdit />}
                 >
-                  Editar
+                  Edit
                 </Button>
                 <Button
                   variant="text"
@@ -163,13 +149,65 @@ const LicenseManager = () => {
                   onClick={() => handleDelete(license.license_key)}
                   startIcon={<FaTrash />}
                 >
-                  Eliminar
+                  Delete
                 </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      {/* Modal for creating or editing a license */}
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            {modalType === "edit" ? "Edit License" : "Generate New License"}
+          </Typography>
+          <TextField
+            label="License Key"
+            value={newLicense.license_key}
+            onChange={(e) =>
+              setNewLicense({ ...newLicense, license_key: e.target.value })
+            }
+            margin="normal"
+            fullWidth
+            disabled={modalType === "edit"} // Key is not editable in edit mode
+          />
+          <TextField
+            label="Expiration Date"
+            type="date"
+            value={newLicense.expiration_date}
+            onChange={(e) =>
+              setNewLicense({ ...newLicense, expiration_date: e.target.value })
+            }
+            margin="normal"
+            fullWidth
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+          <Box mt={2} display="flex" justifyContent="flex-end">
+            <Button onClick={handleCloseModal} style={{ marginRight: "10px" }}>
+              Cancel
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleSave}>
+              Save
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 };
