@@ -10,6 +10,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { FaEdit, FaTrash } from "react-icons/fa"; // Importar íconos de React Icons
 import axios from "axios";
 
 const LicenseManager = () => {
@@ -52,9 +53,12 @@ const LicenseManager = () => {
   };
 
   const handleDelete = async (license_key) => {
-    await axios.delete("https://storingfunctions.azurewebsites.net/api/licenses", {
-      data: { license_key },
-    });
+    await axios.delete(
+      "https://storingfunctions.azurewebsites.net/api/licenses",
+      {
+        data: { license_key },
+      }
+    );
     fetchLicenses();
   };
 
@@ -124,6 +128,7 @@ const LicenseManager = () => {
                   variant="text"
                   color="primary"
                   onClick={() => handleEdit(license)}
+                  startIcon={<FaEdit />}
                 >
                   Editar
                 </Button>
@@ -131,6 +136,7 @@ const LicenseManager = () => {
                   variant="text"
                   color="secondary"
                   onClick={() => handleDelete(license.license_key)}
+                  startIcon={<FaTrash />}
                 >
                   Eliminar
                 </Button>
