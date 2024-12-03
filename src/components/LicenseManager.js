@@ -37,6 +37,7 @@ const LicenseManager = () => {
         ([key, value]) => ({
           license_key: key,
           expiration_date: value.expiration_date,
+          last_checked_date: value.last_checked_date,
         })
       );
 
