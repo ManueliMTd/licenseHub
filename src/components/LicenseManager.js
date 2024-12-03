@@ -145,6 +145,7 @@ const LicenseManager = () => {
           <TableRow>
             <TableCell>Key</TableCell>
             <TableCell>Expiration Date</TableCell>
+            <TableCell>Last Checked</TableCell>
             <TableCell>Actions</TableCell>
             <TableCell>Status</TableCell>
           </TableRow>
@@ -158,6 +159,9 @@ const LicenseManager = () => {
               <TableRow key={license.license_key}>
                 <TableCell>{license.license_key}</TableCell>
                 <TableCell>{license.expiration_date}</TableCell>
+                <TableCell>
+                  {license.last_checked_date || "Not yet checked"}
+                </TableCell>
                 <TableCell>
                   <Button
                     variant="text"
