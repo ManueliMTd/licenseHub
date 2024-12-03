@@ -22,7 +22,7 @@ const LicenseManager = () => {
     license_key: "",
     expiration_date: "",
   });
-  const [editingLicense, setEditingLicense] = useState(null);
+  const [, setEditingLicense] = useState(null);
 
   // Fetch licenses from the backend and transform the object into an array
   const fetchLicenses = async () => {
